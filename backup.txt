@@ -1,0 +1,181 @@
+<?php
+include ("konfig/koneksi.php");
+$s=mysqli_query($conn, "select * from kriteria");
+$h=mysqli_num_rows($s);
+
+
+?>
+
+<div class="box-header">
+    <h3 class="box-title " >Nilai Matriks Ternormalisasi</h3>
+</div>
+
+<table class="table table-bordered table-responsive">
+<thead>
+<tr>
+<th rowspan="2">No</th>
+<th rowspan="2">Nama</th>
+<th colspan="<?php echo $h; ?>">Kriteria</th>
+</tr>
+<tr>
+<?php
+for($n=1;$n<=$h;$n++){
+	echo"<th>C{$n}</th>";
+}
+?>
+</tr>
+</thead>
+<tbody>
+<?php
+$i=0;
+$a=mysqli_query($conn, "select * from alternatif");
+
+
+
+while($da=mysqli_fetch_assoc($a)){
+	echo "<tr>
+		<td>".(++$i)."</td>
+		<td>$da[nm_alternatif]</td>";
+		$idalt=$da['id_alternatif'];
+		
+		
+		//ambil nilai
+			$n=mysqli_query($conn, "select * from nilai_matrik where id_alternatif='$idalt'");
+			
+		
+		
+		
+		while($dn=mysqli_fetch_assoc($n)){
+			//nilai kuadrat
+			$nilai_kuadrat=0;
+			//ambil kriteria
+				$kr=mysqli_query($conn, "select * from kriteria");
+				while($dkr=mysqli_fetch_assoc($kr)){
+				$idkrit=$dkr['id_kriteria'];
+			
+			$n2=mysqli_query($conn, "select * from nilai_matrik where id_kriteria='$idkrit'");
+			while($dn2=mysqli_fetch_assoc($n2)){
+			
+			$nilai_kuadrat=$nilai_kuadrat+($dn2['nilai']*$dn2['nilai']);
+				}
+			}
+			echo "<td align='center'>".round(($dn['nilai']/sqrt($nilai_kuadrat)),3).'-'.$nilai_kuadrat."</td>";
+		
+		}
+		
+		echo "</tr>\n";
+
+}
+
+?>
+
+</tbody>
+</table>
+
+==========================================================
+<?php
+include ("konfig/koneksi.php");
+$s=mysqli_query($conn, "select * from kriteria");
+$h=mysqli_num_rows($s);
+
+
+?>
+
+<div class="box-header">
+    <h3 class="box-title " >Matriks Ideal Positif (A<sup>+</sup>)</h3>
+</div>
+
+<table class="table table-bordered table-responsive">
+<thead>
+<tr>
+<th colspan="<?php echo $h; ?>">Kriteria</th>
+</tr>
+<tr>
+<?php
+$hk=mysqli_query($conn, "select nama_kriteria from kriteria");
+while($dhk=mysqli_fetch_assoc($hk)){
+
+	echo"<th>$dhk[nama_kriteria]</th>";
+}
+?>
+</tr>
+<tr>
+<?php
+
+for($n=1;$n<=$h;$n++){
+
+	echo"<th>y<sub>$n</sub><sup>+</sup></th>";
+}
+?>
+</tr>
+</thead>
+<tbody>
+<?php
+$i=0;
+$a=mysqli_query($conn, "select * from alternatif");
+
+while($da=mysqli_fetch_assoc($a)){
+
+	echo "<tr>";
+		
+		$idalt=$da['id_alternatif'];
+	
+		//ambil nilai
+			
+			$n=mysqli_query($conn, "select * from nilai_matrik where id_alternatif='$idalt'");
+		
+		$c=0;
+		$ymax=array();
+		while($dn=mysqli_fetch_assoc($n)){
+			$idk=$dn['id_kriteria'];
+			
+			
+			//nilai kuadrat
+			
+			$nilai_kuadrat=0;
+			$k=mysqli_query($conn, "select * from nilai_matrik where id_kriteria='$idk' ");
+			while($dkuadrat=mysqli_fetch_assoc($k)){
+				$nilai_kuadrat=$nilai_kuadrat+($dkuadrat['nilai']*$dkuadrat['nilai']);
+			}
+
+			//hitung jml alternatif
+			$jml_alternatif=mysqli_query($conn, "select * from alternatif");
+			$jml_a=mysqli_num_rows($jml_alternatif);	
+			//nilai bobot kriteria (rata")
+			$bobot=0;
+			$tnilai=0;
+			
+			$k2=mysqli_query($conn, "select * from nilai_matrik where id_kriteria='$idk' ");
+			while($dbobot=mysqli_fetch_assoc($k2)){
+				$tnilai=$tnilai+$dbobot['nilai'];
+			}	
+			 $bobot=$tnilai/$jml_a;
+			
+			
+			//echo "<td align='center'>".$v=round(($dn['nilai']/sqrt($nilai_kuadrat))*$bobot,3)."</td>";
+			
+			$v=round(($dn['nilai']/sqrt($nilai_kuadrat))*$bobot,3);
+
+				$ymax[$c]=$v;
+				$c++;
+		}
+		print_r($ymax)."<br/>";
+		echo $ymax['0']."<br/>";
+		
+		echo "</tr>\n";
+
+}
+?>
+
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
